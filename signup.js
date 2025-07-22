@@ -12,12 +12,9 @@ form.addEventListener('submit', async (e) => {
   const chapter  = document.getElementById('signup-chapter').value;
 
   try {
-    // 1) 기존 사용자 정보 조회 (새 사용자 등록 전)
+    // 1) 기존 사용자 정보 조회
     const usersSnap = await getDocs(collection(db, 'users'));
-    const existingUsers = usersSnap.docs.map(docSnap => ({
-      uid: docSnap.id,
-      data: docSnap.data()
-    }));
+    const existingUsers = usersSnap.docs.map(docSnap => ({ uid: docSnap.id, name: docSnap.data().name }));
 
     // 2) Firebase Auth에 사용자 등록
     const userCred = await createUserWithEmailAndPassword(auth, id, password);
@@ -25,8 +22,8 @@ form.addEventListener('submit', async (e) => {
 
     // 3) 새 사용자 문서 생성용 playCounts 맵 구성
     const newPlayCounts = {};
-    existingUsers.forEach(({ data }) => {
-      newPlayCounts[data.name] = 0;
+    existingUsers.forEach(({ name: otherName }) => {
+      newPlayCounts[otherName] = 0;
     });
 
     // 4) Firestore에 사용자 정보 저장
@@ -40,16 +37,18 @@ form.addEventListener('submit', async (e) => {
       isAdmin: 0
     });
 
-    // 5) 기존 사용자들의 playCounts에 새 사용자 이름 추가
-    if (existingUsers.length > 0) {
-      const batch = writeBatch(db);
-      existingUsers.forEach(({ uid: otherUid }) => {
-        const otherRef = doc(db, 'users', otherUid);
-        batch.update(otherRef, {
-          [`playCounts.${name}`]: 0
+    // 5) 기존 사용자들의 playCounts에 새 사용자 이름 추가 (권한 부족 시 무시)
+    try {
+      if (existingUsers.length > 0) {
+        const batch = writeBatch(db);
+        existingUsers.forEach(({ uid: otherUid }) => {
+          const otherRef = doc(db, 'users', otherUid);
+          batch.update(otherRef, { [`playCounts.${name}`]: 0 });
         });
-      });
-      await batch.commit();
+        await batch.commit();
+      }
+    } catch (batchError) {
+      console.warn('기존 사용자 업데이트 권한 없음:', batchError);
     }
 
     alert('회원가입에 성공했습니다.');
