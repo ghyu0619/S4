@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>메인페이지</title>
+  <style>
+    /* 공통 스타일은 base_template에 포함됨 */
+    main {
+      text-align: center;
+    }
+    .main-title {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn-group button {
+      flex: 1;
+      min-width: 120px;
+    }
+    #btn-boardgame {
+      background-color: #28a745;
+      color: #fff;
+    }
+  </style>
+  <script type="module" src="./firebase.js"></script>
+  <script type="module" src="./header.js"></script>
+</head>
+<body>
+  <header></header>
+  <main>
+    <h1 class="main-title">싱싱수S 2025</h1>
+    <h2 class="subtitle">부제: 십자가, 그 사랑 안에서</h2>
+    <div class="btn-group">
+      <button id="btn-schedule">수련회 시간표</button>
+      <button id="btn-grouping">조편성</button>
+      <button id="btn-praise">수련회 찬양</button>
+    </div>
+    <div class="btn-group">
+      <button id="btn-boardgame">보드게임카페</button>
+    </div>
+  </main>
+  <footer></footer>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
