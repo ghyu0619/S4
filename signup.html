@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>회원가입</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header, footer {
+      background-color: #f1f1f1;
+      padding: 1rem;
+    }
+    main {
+      flex: 1;
+      padding: 1rem;
+      max-width: 960px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    input, select, button {
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    @media (min-width: 600px) {
+      input, select, button {
+        width: auto;
+      }
+    }
+  </style>
+  <script type="module" src="./firebase.js"></script>
+  <script type="module" src="./header.js"></script>
+</head>
+<body>
+  <header></header>
+  <main>
+    <h1>회원가입</h1>
+    <form id="signup-form">
+      <input id="signup-id" type="text" placeholder="ID" required />
+      <input id="signup-password" type="password" placeholder="Password" required />
+      <input id="signup-name" type="text" placeholder="이름" required />
+      <select id="signup-group" required>
+        <option value="">소속 목장 선택</option>
+        <option>네팔로우</option>
+        <option>두마게티</option>
+        <option>두마게이트</option>
+        <option>몽글로리</option>
+        <option>바양헝거르</option>
+        <option>사라나오</option>
+        <option>시로이시</option>
+        <option>시에라리온</option>
+        <option>앙헬레스</option>
+        <option>캄온츠낭</option>
+        <option>호치민</option>
+        <option>미소속</option>
+      </select>
+      <select id="signup-chapter" required>
+        <option value="">조 선택</option>
+        <option>1조</option>
+        <option>2조</option>
+        <option>3조</option>
+        <option>4조</option>
+        <option>5조</option>
+        <option>6조</option>
+        <option>7조</option>
+      </select>
+      <button type="submit">회원가입</button>
+    </form>
+  </main>
+  <footer></footer>
+  <script type="module" src="./signup.js"></script>
+</body>
+</html>
