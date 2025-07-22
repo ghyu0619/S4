@@ -1,6 +1,6 @@
 import { auth, db } from './firebase.js';
 import { createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js';
-import { doc, setDoc, collection, getDocs, updateDoc } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
+import { doc, setDoc, collection, getDocs, writeBatch } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
 
 const form = document.getElementById('signup-form');
 form.addEventListener('submit', async (e) => {
@@ -12,40 +12,45 @@ form.addEventListener('submit', async (e) => {
   const chapter  = document.getElementById('signup-chapter').value;
 
   try {
-    // Firebase Auth 등록
+    // 1) 기존 사용자 정보 조회 (새 사용자 등록 전)
+    const usersSnap = await getDocs(collection(db, 'users'));
+    const existingUsers = usersSnap.docs.map(docSnap => ({
+      uid: docSnap.id,
+      data: docSnap.data()
+    }));
+
+    // 2) Firebase Auth에 사용자 등록
     const userCred = await createUserWithEmailAndPassword(auth, id, password);
     const uid = userCred.user.uid;
 
-    // Firestore에 사용자 정보 초기 저장
+    // 3) 새 사용자 문서 생성용 playCounts 맵 구성
+    const newPlayCounts = {};
+    existingUsers.forEach(({ data }) => {
+      newPlayCounts[data.name] = 0;
+    });
+
+    // 4) Firestore에 사용자 정보 저장
     await setDoc(doc(db, 'users', uid), {
       id,
       name,
       group,
       chapter,
       points: 0,
-      playCounts: {}
+      playCounts: newPlayCounts,
+      isAdmin: 0
     });
 
-    // 이미 등록된 다른 사용자들에 대해 playCounts 업데이트
-    const usersSnap = await getDocs(collection(db, 'users'));
-    const newPlayCounts = {};
-    usersSnap.forEach(docSnap => {
-      const otherId = docSnap.id;
-      const data    = docSnap.data();
-      if (otherId !== uid) {
-        // 새 사용자 이름을 기존 사용자들의 playCounts에 추가
-        updateDoc(doc(db, 'users', otherId), {
+    // 5) 기존 사용자들의 playCounts에 새 사용자 이름 추가
+    if (existingUsers.length > 0) {
+      const batch = writeBatch(db);
+      existingUsers.forEach(({ uid: otherUid }) => {
+        const otherRef = doc(db, 'users', otherUid);
+        batch.update(otherRef, {
           [`playCounts.${name}`]: 0
         });
-        // 기존 사용자 이름을 새 사용자의 playCounts에 추가
-        newPlayCounts[data.name] = 0;
-      }
-    });
-
-    // 새 사용자 playCounts 필드 업데이트
-    await updateDoc(doc(db, 'users', uid), {
-      playCounts: newPlayCounts
-    });
+      });
+      await batch.commit();
+    }
 
     alert('회원가입에 성공했습니다.');
     window.location.href = 'login.html';
